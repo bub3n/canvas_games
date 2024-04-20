@@ -118,3 +118,13 @@ window.addEventListener('keydown', (event) => {
         jump_end_player = player.position.y - jump_height
     }
 })
+
+window.addEventListener('onclick', (event) => {
+    console.log(event.key);
+    if (event.key == " "){
+        console.log("OH yeeeeeee")
+        jump = true
+        jump_end_enemy = enemy.position.y - jump_height
+        jump_end_player = player.position.y - jump_height
+    }
+})
