@@ -14,21 +14,28 @@ var jump_player = false
 var jump_start_enemy = 0
 var jump_start_player = 0
 const jump_height = 100
+const image_player = new Image();
+const image_enemy = new Image();
+image_player.src = "data/Sprites/player/Idle.png"
+image_enemy.src = "data/Sprites/player/Idle.png"
+spriteWidth = // https://www.youtube.com/watch?v=CY0HE277IBM&ab_channel=Frankslaboratory
 
 const gravity = 0.2
 // method for defining sprite object
 class Sprite {
-  constructor({ position, velocity, color }) {
+  constructor({ position, velocity, color, image }) {
     this.position = position
     this.velocity = velocity
-    this.height = 150
+    this.height = 190
     this.color = color
+    this.image = image
   }
 
   // draw characer function
   draw() {
     c.fillStyle = this.color
-    c.fillRect(this.position.x, this.position.y, 50, this.height)
+    //c.drawImage(this.image, this.position.x, this.position.y)
+    c.drawImage(this.image, 0, 0, 200, 200, 0, 0, canvas.width, canvas.height)
   }
 
   // update positions
@@ -38,10 +45,12 @@ class Sprite {
     // move rectangle
     this.position.y += this.velocity.y
 
+
+
     if ( jump == true ) {
         // go up if still in jump
         if ( this.position.y - this.velocity.y >= jump_end_player ) {
-            console.log(this.position.y)
+            console.log(this.velocity.y)
             this.velocity.y -= gravity
         // disable jump on and of jump
         } else {
@@ -69,7 +78,8 @@ const player = new Sprite({
         x: 0,
         y: 0
     },
-    color: 'red'
+    color: 'red',
+    image: image_player
 })
 // debug player object
 console.log(player)
@@ -84,7 +94,8 @@ const enemy = new Sprite({
         x: 0,
         y: 0
     },
-    color: 'blue'
+    color: 'blue',
+    image: image_enemy
 })
 // debug enemy object
 console.log(enemy)
@@ -110,16 +121,6 @@ animate()
 
 // add handler for listening on key press
 window.addEventListener('keydown', (event) => {
-    console.log(event.key);
-    if (event.key == " "){
-        console.log("OH yeeeeeee")
-        jump = true
-        jump_end_enemy = enemy.position.y - jump_height
-        jump_end_player = player.position.y - jump_height
-    }
-})
-
-window.addEventListener('touchend', (event) => {
     console.log(event.key);
     if (event.key == " "){
         console.log("OH yeeeeeee")
