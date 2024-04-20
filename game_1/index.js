@@ -119,7 +119,7 @@ window.addEventListener('keydown', (event) => {
     }
 })
 
-window.addEventListener('onclick', (event) => {
+window.addEventListener('touchend', (event) => {
     console.log(event.key);
     if (event.key == " "){
         console.log("OH yeeeeeee")
