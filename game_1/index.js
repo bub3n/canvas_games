@@ -61,7 +61,7 @@ class Sprite {
     c.drawImage(this.sprite[this.action].image, this.sprite[this.action].width*this.frame_number, 0, this.sprite[this.action].width, this.sprite[this.action].height, this.position.x, this.position.y, this.sprite[this.action].width, this.sprite[this.action].height)
 
     this.frameCount += 1
-    if (this.frameCount % 25 === 0) {
+    if (this.frameCount % 15 === 0) {
         if (this.frame_number >= this.sprite[this.action].frames_count) {
             this.frame_number = 0
         } else {
@@ -91,7 +91,9 @@ class Sprite {
     } else {
         // fall on ground
         if ( this.position.y + this.sprite.idle.height + this.velocity.y >= canvas.height ){
-            this.changeAction('idle')
+            if ( this.velocity.y != 0) {
+                this.changeAction('idle')
+            }
             this.velocity.y = 0
         // stop on ground
         } else {
