@@ -13,9 +13,11 @@ var jump_enemy = false
 var jump_player = false
 var jump_start_enemy = 0
 var jump_start_player = 0
+
+
+// constants
+// actions
 const jump_height = 100
-
-
 // load images
 // player
 const image_player_idle = new Image();
@@ -24,6 +26,8 @@ const image_player_jump = new Image();
 image_player_jump.src = "data/Sprites/player/Jump.png"
 const image_player_fall = new Image();
 image_player_fall.src = "data/Sprites/player/Fall.png"
+const image_player_run = new Image();
+image_player_run.src = "data/Sprites/player/Run.png"
 
 // enemy
 const image_enemy_idle = new Image();
@@ -32,8 +36,12 @@ const image_enemy_jump = new Image();
 image_enemy_jump.src = "data/Sprites/enemy/Jump.png"
 const image_enemy_fall = new Image();
 image_enemy_fall.src = "data/Sprites/enemy/Fall.png"
+const image_enemy_run = new Image();
+image_enemy_run.src = "data/Sprites/enemy/Run.png"
 
-const gravity = 0.2
+const gravity = 0.05
+const move_velocity = 0.05
+const max_run_speed = 10
 // method for defining sprite object
 class Sprite {
   constructor({ position, velocity, color, sprite }) {
@@ -41,29 +49,36 @@ class Sprite {
     this.velocity = velocity
     this.color = color
     this.sprite = sprite
+
+    // set defaults
     this.action = 'idle'
     this.jump = false
-
     this.frame_number = 0
     this.frameCount = 0
+    this.move_velocity = 0
+    this.move_x = 0
   }
 
+  // change action and reset frame_number
   changeAction(action) {
-    this.action = action
-    this.frame_number = 0
+    if (action != this.action) {
+        this.action = action
+        this.frame_number = 0
+    }
   }
 
   // draw characer function
   draw() {
-    console.log(this.action)
-    console.log(this.frame_number)
     c.fillStyle = this.color
     c.drawImage(this.sprite[this.action].image, this.sprite[this.action].width*this.frame_number, 0, this.sprite[this.action].width, this.sprite[this.action].height, this.position.x, this.position.y, this.sprite[this.action].width, this.sprite[this.action].height)
 
     this.frameCount += 1
+    // change frame on every 15 counter
     if (this.frameCount % 15 === 0) {
+        // reset frame if we are on end
         if (this.frame_number >= this.sprite[this.action].frames_count) {
             this.frame_number = 0
+        // move to another frame
         } else {
             this.frame_number += 1
         }
@@ -83,7 +98,7 @@ class Sprite {
         if ( this.position.y - this.velocity.y >= jump_end_player ) {
             this.velocity.y -= gravity
             this.changeAction('jump')
-        // disable jump on and of jump
+        // disable jump on end of jump
         } else {
             this.jump = false
             this.velocity.y = 0
@@ -91,6 +106,7 @@ class Sprite {
     } else {
         // fall on ground
         if ( this.position.y + this.sprite.idle.height + this.velocity.y >= canvas.height ){
+            // change to idle if we are on ground - otherwise reset animation everytime
             if ( this.velocity.y != 0) {
                 this.changeAction('idle')
             }
@@ -100,6 +116,13 @@ class Sprite {
             this.changeAction('fall')
             this.velocity.y += gravity
         }
+    }
+    if ( (Math.round(parseFloat(this.move_x)*100)/100) != 0 ) {
+        console.log(this.move_x)
+        this.position.x += this.move_x
+        //this.move_x += (this.move_x*-1)
+    } else {
+        this.changeAction('idle')
     }
   }
 }
@@ -111,8 +134,8 @@ const player = new Sprite({
         y: 0
     },
     velocity: {
-        x: 0,
-        y: 0
+        x: 0.05,
+        y: 0.05
     },
     sprite: {
         'idle': {
@@ -132,12 +155,16 @@ const player = new Sprite({
             width: 200,
             height: 200,
             frames_count: 1
+        },
+        'run': {
+            image: image_player_run,
+            width: 200,
+            height: 200,
+            frames_count: 7
         }
     },
     revert: false
 })
-// debug player object
-console.log(player)
 
 // create enemy object
 const enemy = new Sprite({
@@ -146,8 +173,8 @@ const enemy = new Sprite({
         y: 0
     },
     velocity: {
-        x: 0,
-        y: 0
+        x: 0.05,
+        y: 0.05
     },
     sprite: {
         'idle': {
@@ -167,14 +194,16 @@ const enemy = new Sprite({
             width: 126,
             height: 155,
             frames_count: 2
+        },
+        'run': {
+            image: image_enemy_run,
+            width: 126,
+            height: 155,
+            frames_count: 7
         }
     },
     revert: true
 })
-// debug enemy object
-console.log(enemy)
-
-
 
 // function that is called on every request on animation
 function animate() {
@@ -196,11 +225,22 @@ animate()
 // add handler for listening on key press
 window.addEventListener('keydown', (event) => {
     console.log(event.key);
-    if (event.key == " "){
-        console.log("OH yeeeeeee")
+    if (event.key == " " || event.key == "ArrowUp"){
         enemy.jump = true
         player.jump = true    
         jump_end_enemy = enemy.position.y - jump_height
         jump_end_player = player.position.y - jump_height
+    }
+    if (event.key == "ArrowLeft"){
+        player.move_x += (player.velocity.x*-1)
+        enemy.move_x += (enemy.velocity.x*-1)
+        player.changeAction('run')
+        enemy.changeAction('run')
+    }
+    if (event.key == "ArrowRight"){
+        player.move_x += player.velocity.x
+        enemy.move_x += enemy.velocity.x
+        player.changeAction('run')
+        enemy.changeAction('run')
     }
 })
