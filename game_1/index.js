@@ -8,16 +8,13 @@ canvas.height = 575
 // fill by rectangle
 c.fillRect(0, 0, canvas.width, canvas.height)
 
-var jump = false
-var jump_enemy = false
-var jump_player = false
-var jump_start_enemy = 0
-var jump_start_player = 0
-
 
 // constants
 // actions
-const jump_height = 100
+const jump_height = 200
+const gravity = 0.05
+const move_velocity = 0.05
+const max_run_speed = 10
 // load images
 // player
 const image_player_idle = new Image();
@@ -39,9 +36,7 @@ image_enemy_fall.src = "data/Sprites/enemy/Fall.png"
 const image_enemy_run = new Image();
 image_enemy_run.src = "data/Sprites/enemy/Run.png"
 
-const gravity = 0.05
-const move_velocity = 0.05
-const max_run_speed = 10
+
 // method for defining sprite object
 class Sprite {
   constructor({ position, velocity, color, sprite }) {
@@ -57,11 +52,13 @@ class Sprite {
     this.frameCount = 0
     this.move_velocity = 0
     this.move_x = 0
+    this.jump_end = 0
   }
 
   // change action and reset frame_number
   changeAction(action) {
     if (action != this.action) {
+        console.log("changeAction: " + action )
         this.action = action
         this.frame_number = 0
     }
@@ -93,14 +90,15 @@ class Sprite {
     // move rectangle
     this.position.y += this.velocity.y
 
+    /// JUMP ///
     if ( this.jump == true ) {
         // go up if still in jump
-        if ( this.position.y - this.velocity.y >= jump_end_player ) {
+        if ( this.position.y - this.velocity.y >= this.jump_end ) {
             this.velocity.y -= gravity
-            this.changeAction('jump')
         // disable jump on end of jump
         } else {
             this.jump = false
+            this.changeAction('fall')
             this.velocity.y = 0
         }
     } else {
@@ -113,16 +111,28 @@ class Sprite {
             this.velocity.y = 0
         // stop on ground
         } else {
-            this.changeAction('fall')
             this.velocity.y += gravity
         }
     }
+
+    /// MOVE ///
+    // check if we started running and then change x position
     if ( (Math.round(parseFloat(this.move_x)*100)/100) != 0 ) {
-        console.log(this.move_x)
-        this.position.x += this.move_x
-        //this.move_x += (this.move_x*-1)
+        // right border
+        if ( this.position.x + this.sprite.run.width <= canvas.width && this.move_x > 0 ) {
+            this.position.x += this.move_x
+        // left border
+        } else if ( this.position.x >= 0 && this.move_x < 0 ) {
+            this.position.x += this.move_x
+        // stop on corner
+        } else {
+            this.move_x = 0
+        }
     } else {
-        this.changeAction('idle')
+        // if we are not running check if action is run and change to idle
+        if ( this.action == 'run' ) {
+            this.changeAction('idle')
+        }
     }
   }
 }
@@ -130,7 +140,7 @@ class Sprite {
 // create object player
 const player = new Sprite({
     position: {
-        x: -50,
+        x: 250,
         y: 0
     },
     velocity: {
@@ -162,14 +172,13 @@ const player = new Sprite({
             height: 200,
             frames_count: 7
         }
-    },
-    revert: false
+    }
 })
 
 // create enemy object
 const enemy = new Sprite({
     position: {
-        x: 200,
+        x: 600,
         y: 0
     },
     velocity: {
@@ -201,8 +210,7 @@ const enemy = new Sprite({
             height: 155,
             frames_count: 7
         }
-    },
-    revert: true
+    }
 })
 
 // function that is called on every request on animation
@@ -228,8 +236,10 @@ window.addEventListener('keydown', (event) => {
     if (event.key == " " || event.key == "ArrowUp"){
         enemy.jump = true
         player.jump = true    
-        jump_end_enemy = enemy.position.y - jump_height
-        jump_end_player = player.position.y - jump_height
+        enemy.jump_end = enemy.position.y - jump_height
+        player.jump_end = player.position.y - jump_height
+        player.changeAction('jump')
+        enemy.changeAction('jump')
     }
     if (event.key == "ArrowLeft"){
         player.move_x += (player.velocity.x*-1)
