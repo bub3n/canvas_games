@@ -1,0 +1,9 @@
+body {
+    min-height: 95%;
+    width: 95%
+}
+
+canvas {
+    min-height: 100%;
+    width: 100%
+}

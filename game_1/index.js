@@ -3,10 +3,12 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
 // setup canvas size and color
-canvas.width = 1024
-canvas.height = 575
+width = window.innerWidth;
+height = window.innerHeight;
+//canvas.width = 1024
+//canvas.height = 575
 // fill by rectangle
-c.fillRect(0, 0, canvas.width, canvas.height)
+c.fillRect(0, 0, width, height)
 
 
 // constants
@@ -103,7 +105,7 @@ class Sprite {
         }
     } else {
         // fall on ground
-        if ( this.position.y + this.sprite.idle.height + this.velocity.y >= canvas.height ){
+        if ( this.position.y + this.sprite.idle.height + this.velocity.y >= height ){
             // change to idle if we are on ground - otherwise reset animation everytime
             if ( this.velocity.y != 0) {
                 this.changeAction('idle')
@@ -119,7 +121,7 @@ class Sprite {
     // check if we started running and then change x position
     if ( (Math.round(parseFloat(this.move_x)*100)/100) != 0 ) {
         // right border
-        if ( this.position.x + this.sprite.run.width <= canvas.width && this.move_x > 0 ) {
+        if ( this.position.x + this.sprite.run.width <= width && this.move_x > 0 ) {
             this.position.x += this.move_x
         // left border
         } else if ( this.position.x >= 0 && this.move_x < 0 ) {
@@ -140,7 +142,7 @@ class Sprite {
 // create object player
 const player = new Sprite({
     position: {
-        x: 250,
+        x: width/6,
         y: 0
     },
     velocity: {
@@ -178,7 +180,7 @@ const player = new Sprite({
 // create enemy object
 const enemy = new Sprite({
     position: {
-        x: 600,
+        x: width/3,
         y: 0
     },
     velocity: {
@@ -220,7 +222,7 @@ function animate() {
     // fill back with black
     c.fillStyle = 'black'
     // clean background on every call
-    c.fillRect(0, 0, canvas.width, canvas.height)
+    c.fillRect(0, 0, width, height)
     // reanimate characters
     player.update()
     enemy.update()
